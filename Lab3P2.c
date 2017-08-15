@@ -1,48 +1,62 @@
-
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <pwd.h>
 
-  int main(int argc, char *argv[]) {
-    int i, j;
-    printf("--Start of Lab 3 program--\n");
-    struct stat buf;
-	gid_t getgid(void);
-    pid_t pid = fork();
-	if (argc < 2) {
+void getFile(){
+	DIR *dir;
+	struct dirent *sd;
 	
-		DIR *dir;
-		struct dirent *sd;
-		
-		dir = opendir(argv[1]);
-		
-		if (dir == NULL) {
-			printf("Could not open directory \n");
-			exit(1);
-		}
-		
-		while( (sd = readdir(dir)) != NULL ) {
-			printf(">> %s\n",   sd -> d_name);
-			
-			
-		}
-		
-		closedir(dir);
-		return 0;
+	dir = opendir(".");
+	
+	if(dir == NULL)
+	{
+	
+		printf("Error");
+		exit(1);
 		
 	}
 	
-    if (pid < 0) {
+	while ( (sd = readdir(dir)) != NULL )
+	{
+		printf(">> %s\n", sd->d_name);
+	}
+	
+	
+	closedir(dir);
+}
+  
+  
+int main(int argc, char *argv[])
+{ 
+	struct stat buf;
+	struct passwd pwd;
+    struct passwd *result;
+	
+	if(argc<2)
+	{
+		printf("Lab 3 Part 2, type a file to choose\n");
+		getFile();
+	} 
+	
+	int i, j;
+    printf("--Start of Lab 3 program--\n");
+	gid_t getgid(void);
+    pid_t pid = fork();
+	
+	
+	
+	if (pid < 0) {
       perror("Fork failed");
     }
     if (pid == 0) {
       for (i = 1; i < argc; i++) {
         stat(argv[i], &buf);
         printf("\n File:%s => ", argv[i]);
-
+	
         if (getuid() == buf.st_uid) {
           printf("You have owner permissions: ");
           if (buf.st_mode & 00400) {
@@ -61,6 +75,7 @@
 
           }
           printf("\n");
+		  printf("Directory: %s\n", getpwuid(getuid())->pw_dir);
 
         } else if (getgid() == buf.st_gid) {
           printf("You have group permissions: ");
